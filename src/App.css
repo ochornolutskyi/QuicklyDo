@@ -52,6 +52,18 @@ button:active {
     color: #fff;
     word-wrap: break-word;
 }
+.emptyList {
+    display: block;
+    width: max-content;
+    padding: 5px;
+    font-size: 1em;
+    margin: 0 auto;
+    border-radius: 5px;
+    border: 0;
+    outline: none;
+    background-color: #985914;
+    color: #fff;
+}
 .item-button {
     margin-right: 5px;
     padding: 5px;

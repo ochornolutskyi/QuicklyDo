@@ -6,8 +6,7 @@ import EndedList from "./EndedList/EndedList";
 
 class App extends Component {
     state = {
-        tasks: [        ],
-        ended: []
+        tasks: []
     };
 
     onChangeNewTaskTitle(inputChanges) {
@@ -27,7 +26,11 @@ class App extends Component {
             input.focus();
         } else {
             let tasks = [...this.state.tasks];
-            tasks.push({ itemTitle: newTask });
+            tasks.push({
+                taskTitle: newTask,
+                wasEnded: false,
+                id: String(Date.now())
+            });
             event.target.reset();
             this.setState({
                 tasks: tasks
@@ -35,97 +38,80 @@ class App extends Component {
         }
     }
 
-    onEndTask(index) {
-        let endedTask = [...this.state.ended];
-        const currentEndedTask = this.state.tasks[index];
-        endedTask.push(currentEndedTask);
-        this.deleteMustDoTasksHandler(index);
+    onEndTask(id) {
+        let tasks = [...this.state.tasks];
+        let currentEndedTask = tasks.filter(item => item.id === id)[0];
+        currentEndedTask.wasEnded = true;
         this.setState({
-            ended: endedTask
+            tasks: tasks
         });
     }
 
-    onEditTask(index) {
-        const task = this.state.tasks[index];
+    onEditTask(id) {
+        let tasks = [...this.state.tasks];
+        let editTask = tasks.filter(item => item.id === id)[0];
         let newTitle = prompt(
-            "Please, enter a new task title: ",
-            task.itemTitle
+            "Please, enter a new title for the current task: ",
+            editTask.taskTitle
         );
-        if (!newTitle) {
-            return;
-        }
-        this.onChangeItemTitle(newTitle, index);
-    }
-
-    onChangeItemTitle = (itemTitle, index) => {
-        const tasks = [...this.state.tasks];
-        const task = this.state.tasks[index];
-        task.itemTitle = itemTitle;
-        tasks[index] = task;
-        this.setState({
-            tasks: tasks
-        });
-    };
-
-    deleteMustDoTasksHandler(index) {
-        const tasks = [...this.state.tasks];
-        tasks.splice(index, 1);
+        editTask.taskTitle = newTitle;
         this.setState({
             tasks: tasks
         });
     }
 
-    deleteEndedTasksHandler(index) {
-        const ended = [...this.state.ended];
-        ended.splice(index, 1);
+    deleteTaskHandler(id) {
+        let tasks = [...this.state.tasks];
+        const deletingTask = tasks.filter(item => item.id === id)[0];
+        const from = tasks.indexOf(deletingTask);
+        tasks.splice(from, 1);
         this.setState({
-            ended: ended
+            tasks: tasks
         });
     }
 
     render() {
-        //rendering all tasks
         let tasks = this.state.tasks;
-        if (tasks.length === 0) {
-            tasks = <span className="item-title">Please, add the tasks</span>;
-        } else {
-            tasks = this.state.tasks.map((item, index) => {
+        //rendering must to do tasks
+        let mustDoList = tasks
+            .filter(item => item.wasEnded === false)
+            .map(item => {
                 return (
                     <MustDoList
-                        key={index}
-                        itemTitle={item.itemTitle}
-                        onEndTask={this.onEndTask.bind(this, index)}
-                        onEditTask={this.onEditTask.bind(this, index)}
-                        onChangeItemTitle={event =>
-                            this.onChangeItemTitle(event.target.value, index)
-                        }
-                        onRemoveTask={this.deleteMustDoTasksHandler.bind(
+                        key={item.id}
+                        itemTitle={item.taskTitle}
+                        onEndTask={this.onEndTask.bind(this, item.id)}
+                        onEditTask={this.onEditTask.bind(this, item.id)}
+                        onRemoveTask={this.deleteTaskHandler.bind(
                             this,
-                            index
+                            item.id
                         )}
                     ></MustDoList>
                 );
             });
-        }
-        //rendering ended task
-        let ended = this.state.ended;
-        if (ended.length === 0) {
-            ended = <span className="item-title">Not ended tasks</span>;
-        } else {
-            ended = this.state.ended.map((item, index) => {
+        if (mustDoList.length < 1)
+            mustDoList = (
+                <span className="emptyList">Please, add a new task</span>
+            );
+        //rendering ended tasks
+        let endedList = tasks
+            .filter(item => item.wasEnded === true)
+            .map((item, id) => {
                 return (
                     <EndedList
-                        key={index}
-                        itemTitle={item.itemTitle}
-                        onRemoveTask={this.deleteEndedTasksHandler.bind(
+                        key={id}
+                        itemTitle={item.taskTitle}
+                        onRemoveTask={this.deleteTaskHandler.bind(
                             this,
-                            index
+                            item.id
                         )}
                     ></EndedList>
                 );
             });
-        }
-
+        if (endedList.length < 1)
+            endedList = (
+                <span className="emptyList">You have not done tasks</span>
+            );
         return (
             <div className="wrap">
                 <NewTask
@@ -136,11 +122,11 @@ class App extends Component {
                 ></NewTask>
                 <div className="wrapper mustDoList">
                     <h2 className="title">Must to do:</h2>
-                    <ul className="mustDoList-list">{tasks}</ul>
+                    <ul className="mustDoList-list">{mustDoList}</ul>
                 </div>
                 <div className="wrapper endedList">
                     <h2 className="title">Was done:</h2>
-                    <ul className="wasEnded-list">{ended}</ul>
+                    <ul className="wasEnded-list">{endedList}</ul>
                 </div>
             </div>
         );

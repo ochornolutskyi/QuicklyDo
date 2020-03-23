@@ -2,9 +2,10 @@
     margin-top: 30px;
     margin-bottom: 50px;
 }
-.wasEnded-list {
+.wasEnded-list .item-title {
+    max-width: 420px;
     text-decoration: line-through;
 }
 .wasEnded-list .item-title {
-    color: rgb(199, 199, 199);
+    color: #c7c7c7;
 }
