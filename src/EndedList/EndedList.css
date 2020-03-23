@@ -1,0 +1,10 @@
+.endedList {
+    margin-top: 30px;
+    margin-bottom: 50px;
+}
+.wasEnded-list {
+    text-decoration: line-through;
+}
+.wasEnded-list .item-title {
+    color: rgb(199, 199, 199);
+}
